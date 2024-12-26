@@ -15,11 +15,19 @@ import org.springframework.stereotype.Repository;
 public interface BookRepository extends JpaRepository<Book, Long> {
 
     /**
-     * Finds books in the database where the title contains the given search string.
+     * Finds books in the database where the title contains the given search string
      * @param title The text to search for in book titles
      * @param pageable pagination info like page number and size
      * @return A paginated list of books matching the search text
      */
     Page<Book> findByTitleContaining(@Param("title") String title, Pageable pageable);
+
+    /**
+     * Fetches books from the database that belong to the specified category
+     * @param category The category to filter books by
+     * @param pageable Pagination info like page number and size
+     * @return A paginated list of books matching the given category
+     */
+    Page<Book> findByCategory(@Param("category") String category, Pageable pageable);
 
 }

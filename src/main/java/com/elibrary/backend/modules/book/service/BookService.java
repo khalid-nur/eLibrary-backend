@@ -26,4 +26,13 @@ public interface BookService {
     Page<Book> getBooksByTitle(String title, Pageable pageable);
 
 
+    /**
+     * Fetches a list of books by category with pagination
+     * @param category The category to filter books by
+     * @param pageable Pagination info like page number and size
+     * @return A paginated list of books matching the given category
+     */
+    Page<Book> getBooksByCategory(String category, Pageable pageable);
+
+
 }
