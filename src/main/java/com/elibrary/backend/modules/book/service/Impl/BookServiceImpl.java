@@ -29,4 +29,16 @@ public class BookServiceImpl implements BookService {
     public Page<Book> getBooks(Pageable pageable) {
         return bookRepository.findAll(pageable);
     }
+
+
+    /**
+     * Fetches a list of books by title with pagination
+     * @param title The text to search for in book titles
+     * @param pageable Pagination info like page number and size
+     * @return A paginated list of books matching the search text
+     */
+    @Override
+    public Page<Book> getBooksByTitle(String title, Pageable pageable) {
+        return bookRepository.findByTitleContaining(title, pageable);
+    }
 }
