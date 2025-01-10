@@ -9,6 +9,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 /**
  * Service implementation for business logic involving book
  */
@@ -22,6 +24,7 @@ public class BookServiceImpl implements BookService {
 
     /**
      * Fetches a paginated list of books from the database
+     *
      * @param pageable pagination info
      * @return paginated list of books
      */
@@ -30,10 +33,22 @@ public class BookServiceImpl implements BookService {
         return bookRepository.findAll(pageable);
     }
 
+    /**
+     * Fetches a single book by its id
+     *
+     * @param id the id of the book to fetch
+     * @return the book with the given id
+     */
+    @Override
+    public Optional<Book> getBookById(Long id) {
+        return bookRepository.findById(id);
+    }
+
 
     /**
      * Fetches a list of books by title with pagination
-     * @param title The text to search for in book titles
+     *
+     * @param title    The text to search for in book titles
      * @param pageable Pagination info like page number and size
      * @return A paginated list of books matching the search text
      */
@@ -44,6 +59,7 @@ public class BookServiceImpl implements BookService {
 
     /**
      * Fetches a list of books by category with pagination
+     *
      * @param category The category to filter books by
      * @param pageable Pagination info like page number and size
      * @return A paginated list of books matching the given category
