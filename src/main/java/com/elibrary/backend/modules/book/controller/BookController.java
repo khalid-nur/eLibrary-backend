@@ -8,8 +8,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
-
 /**
  * Controller to manage book requests
  */
@@ -40,20 +38,22 @@ public class BookController {
      * @return the book with the given id
      */
     @GetMapping("/{id}")
-    public Optional<Book> getBookById(@PathVariable Long id) {
-        return bookService.getBookById(id);
+    public ResponseEntity<Book> getBookById(@PathVariable Long id) {
+        Book book = bookService.getBookById(id).get();
+        return ResponseEntity.ok(book);
     }
 
     /**
      * Fetches a list of books where the title contains the given text
      *
-     * @param title    The text to search for in book titles
+     * @param title The text to search for in book titles
      * @param pageable Pagination info like page number and size
      * @return A paginated list of books matching the search text
      */
     @GetMapping("/search")
-    public Page<Book> getBooksByTitle(@RequestParam String title, Pageable pageable) {
-        return bookService.getBooksByTitle(title, pageable);
+    public ResponseEntity<Page<Book>> getBooksByTitle(@RequestParam String title, Pageable pageable) {
+        Page<Book> books = bookService.getBooksByTitle(title, pageable);
+        return ResponseEntity.ok(books);
     }
 
 
@@ -65,8 +65,9 @@ public class BookController {
      * @return A paginated list of books matching the given category
      */
     @GetMapping("/search/category")
-    public Page<Book> getBooksByCategory(@RequestParam String category, Pageable pageable) {
-        return bookService.getBooksByCategory(category, pageable);
+    public ResponseEntity<Page<Book>> getBooksByCategory(@RequestParam String category, Pageable pageable) {
+        Page<Book> books = bookService.getBooksByCategory(category, pageable);
+        return ResponseEntity.ok(books);
     }
 
 }

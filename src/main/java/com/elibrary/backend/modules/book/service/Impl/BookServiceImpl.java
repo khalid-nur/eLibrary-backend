@@ -1,5 +1,6 @@
 package com.elibrary.backend.modules.book.service.Impl;
 
+import com.elibrary.backend.common.exceptions.ResourceNotFoundExceptions;
 import com.elibrary.backend.modules.book.entity.Book;
 import com.elibrary.backend.modules.book.repository.BookRepository;
 import com.elibrary.backend.modules.book.service.BookService;
@@ -41,20 +42,32 @@ public class BookServiceImpl implements BookService {
      */
     @Override
     public Optional<Book> getBookById(Long id) {
-        return bookRepository.findById(id);
+
+        Optional<Book> book = bookRepository.findById(id);
+
+        if (book.isEmpty()) {
+            throw new ResourceNotFoundExceptions("The requested book could not be found");
+
+        }
+
+        return book;
     }
 
 
     /**
      * Fetches a list of books by title with pagination
      *
-     * @param title    The text to search for in book titles
+     * @param title The text to search for in book titles
      * @param pageable Pagination info like page number and size
      * @return A paginated list of books matching the search text
      */
     @Override
     public Page<Book> getBooksByTitle(String title, Pageable pageable) {
-        return bookRepository.findByTitleContaining(title, pageable);
+        Page<Book> books = bookRepository.findByTitleContaining(title, pageable);
+        if (books.isEmpty()) {
+            throw new ResourceNotFoundExceptions("No books matching the given title were found");
+        }
+        return books;
     }
 
     /**
@@ -66,7 +79,11 @@ public class BookServiceImpl implements BookService {
      */
     @Override
     public Page<Book> getBooksByCategory(String category, Pageable pageable) {
-        return bookRepository.findByCategory(category, pageable);
+        Page<Book> books = bookRepository.findByCategory(category, pageable);
+        if (books.isEmpty()) {
+            throw new ResourceNotFoundExceptions("No books found in the specified category");
+        }
+        return books;
     }
 
 }
