@@ -8,9 +8,11 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
  * Configuration for Spring Security
@@ -32,14 +34,27 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain (HttpSecurity httpSecurity) throws Exception{
         return httpSecurity.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/register")
+                .requestMatchers("/auth/register","/auth/login","/books/**", "/reviews/**")
                 .permitAll().anyRequest().authenticated())
+                .sessionManagement((session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)))
                 .httpBasic(Customizer.withDefaults())
+                .addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
     /**
+     * JWT request filter bean for processing JWT tokens in incoming requests
      *
+     * @return the JwtRequestFilter bean
+     */
+    @Bean
+    public JwtRequestFilter authenticationJwtTokenFilter() {
+        return new JwtRequestFilter();
+    }
+
+    /**
+     * Configures the AuthenticationManager bean for handling authentication
      *
      * @param authenticationConfiguration the configuration used to set up the manager
      * @return the AuthenticationManager bean

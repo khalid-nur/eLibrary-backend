@@ -1,13 +1,21 @@
 package com.elibrary.backend.modules.auth.service.Impl;
 
+import com.elibrary.backend.modules.auth.dto.AuthRequest;
+import com.elibrary.backend.modules.auth.dto.AuthResponse;
 import com.elibrary.backend.modules.auth.dto.UserDTO;
 import com.elibrary.backend.modules.auth.entity.User;
+import com.elibrary.backend.modules.auth.exception.InvalidCredentialsException;
 import com.elibrary.backend.modules.auth.exception.UserAlreadyExistsException;
 import com.elibrary.backend.modules.auth.mapper.UserMapper;
 import com.elibrary.backend.modules.auth.repository.UserRepository;
 import com.elibrary.backend.modules.auth.service.AuthService;
+import com.elibrary.backend.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +34,11 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
 
     private final UserMapper userMapper;
+
+    private final AuthenticationManager authenticationManager;
+
+    private final JwtTokenProvider jwtTokenProvider;
+
 
     /**
      * Registers a new user from registration details
@@ -59,5 +72,51 @@ public class AuthServiceImpl implements AuthService {
 
         // Convert the saved User entity back to a UserDTO for the response
         return userMapper.toUserDTOFromUser(user);
+    }
+
+    /**
+     * Authenticates a user and generates a JWT token upon successful login
+     *
+     * @param authRequest Authentication request
+     * @return Authentication response with user details and JWT token
+     */
+    @Override
+    public AuthResponse login(AuthRequest authRequest) {
+
+        // Authenticate the user using the provided credentials
+        Authentication authentication = authenticate(authRequest);
+
+        // Extract the authenticated user's details
+        User user = (User) authentication.getPrincipal();
+
+        // Generate a JWT token for the authenticated user
+        String token = jwtTokenProvider.generateToken(user);
+
+        // Return the authentication response with user details and token
+        return AuthResponse.builder()
+                .email(user.getEmail())
+                .name(user.getName())
+                .role(user.getRole())
+                .token(token)
+                .build();
+
+    }
+
+    /**
+     * Authenticates a user using the provided credentials
+     *
+     * @param authRequest Authentication request
+     * @return Authentication object if successful
+     */
+    private Authentication authenticate(AuthRequest authRequest) {
+        try {
+            // Authenticate the user using the authentication manager to check if the email and password are valid
+            return authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(authRequest.getEmail(),
+                    authRequest.getPassword()));
+        } catch (BadCredentialsException ex) {
+            // If the credentials are wrong, throw an exception
+            throw new InvalidCredentialsException("Invalid email or password");
+        }
     }
 }
