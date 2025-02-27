@@ -1,6 +1,7 @@
 package com.elibrary.backend.common.exceptions;
 
 
+import com.elibrary.backend.modules.auth.exception.InvalidCredentialsException;
 import com.elibrary.backend.modules.auth.exception.UserAlreadyExistsException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -84,7 +85,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     /**
      * Handles MethodArgumentNotValidException with a 400 BAD REQUEST status
-     *Exception is thrown when a request contains invalid or missing fields, failing validation requirements
+     * Exception is thrown when a request contains invalid or missing fields, failing validation requirements
      *
      * @param ex the MethodArgumentNotValidException thrown
      * @return an ErrorObject with validation error details
@@ -111,6 +112,21 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         log.error("Throwing the MethodArgumentNotValidException from GlobalExceptionHandler {}", ex.getMessage());
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Handles InvalidCredentialsException with 401 UNAUTHORIZED status
+     */
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ErrorObject handleInvalidCredentialsException(InvalidCredentialsException ex) {
+        log.error("Invalid credentials error: {}", ex.getMessage());
+        return ErrorObject.builder()
+                .errorCode("INVALID_CREDENTIALS")
+                .statusCode(HttpStatus.UNAUTHORIZED.value())
+                .message(ex.getMessage())
+                .timestamp(new Date())
+                .build();
     }
 
 }
