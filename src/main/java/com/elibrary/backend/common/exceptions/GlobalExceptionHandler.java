@@ -3,6 +3,7 @@ package com.elibrary.backend.common.exceptions;
 
 import com.elibrary.backend.modules.auth.exception.InvalidCredentialsException;
 import com.elibrary.backend.modules.auth.exception.UserAlreadyExistsException;
+import com.elibrary.backend.modules.checkout.exception.LoanOverdueException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -128,6 +129,43 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .timestamp(new Date())
                 .build();
     }
+
+    /**
+     * Handles DuplicateResourceException with a 409 CONFLICT status
+     *
+     * @param ex the DuplicateResourceException thrown
+     * @return an ErrorObject with error details
+     */
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler(DuplicateResourceException.class)
+    public ErrorObject handleDuplicateResourceException(DuplicateResourceException ex) {
+        log.error("Duplicate resource conflict: {}", ex.getMessage());
+        return ErrorObject.builder()
+                .errorCode("DUPLICATE_RESOURCE")
+                .statusCode(HttpStatus.CONFLICT.value())
+                .message(ex.getMessage())
+                .timestamp(new Date())
+                .build();
+    }
+
+    /**
+     * Handles LoanOverdueException with a 400 BAD REQUEST status
+     *
+     * @param ex the LoanOverdueException thrown
+     * @return an ErrorObject with error details
+     */
+    @ResponseStatus(HttpStatus.BAD_REQUEST) // Using 400 Bad Request for business rule violation
+    @ExceptionHandler(LoanOverdueException.class)
+    public ErrorObject handleLoanOverdueException(LoanOverdueException ex) {
+        log.warn("Loan overdue error: {}", ex.getMessage()); // Using warn as it's a client-side business rule violation
+        return ErrorObject.builder()
+                .errorCode("LOAN_OVERDUE") // Specific error code
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .message(ex.getMessage())
+                .timestamp(new Date())
+                .build();
+    }
+
 
 }
 
