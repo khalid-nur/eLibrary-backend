@@ -21,4 +21,15 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
      */
     Page<Review> findByBookId(Long bookId, Pageable pageable);
 
+
+    /**
+     * Finds a review submitted by a user for a book
+     *
+     * @param userEmail the email of the user
+     * @param bookId    the id of the book to check review status for
+     * @return the matching review, or null if not found
+     */
+    Review findByUserEmailAndBookId(String userEmail, Long bookId);
+
+
 }

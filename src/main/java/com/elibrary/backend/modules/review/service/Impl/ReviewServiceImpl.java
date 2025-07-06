@@ -30,4 +30,19 @@ public class ReviewServiceImpl implements ReviewService {
     public Page<Review> getReviewsByBookId(Long bookId, Pageable pageable) {
         return reviewRepository.findByBookId(bookId, pageable);
     }
+
+    /**
+     * CChecks if the user has submitted a review for a book
+     *
+     * @param userEmail the email address of the user
+     * @param bookId   the id of the book to check review status for
+     * @return true if the user has reviewed the book; false otherwise
+     */
+    @Override
+    public boolean isBookReviewedByUser(String userEmail, Long bookId) {
+        Review existingReview = reviewRepository.findByUserEmailAndBookId(userEmail, bookId);
+
+        return existingReview != null;
+
+    }
 }
