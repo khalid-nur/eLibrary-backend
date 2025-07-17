@@ -27,5 +27,12 @@ public interface ReviewService {
      */
     boolean isBookReviewedByUser(String userEmail, Long bookId);
 
+    /**
+     * Fetches the average rating for a specific book
+     *
+     * @param bookId the id of the book
+     * @return the average rating, or 0.0 if there are no reviews
+     */
+    double getAverageRatingByBookId(Long bookId);
 
 }

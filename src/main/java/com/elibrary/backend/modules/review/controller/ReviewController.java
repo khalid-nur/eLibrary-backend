@@ -51,5 +51,18 @@ public class ReviewController {
         return ResponseEntity.ok(reviewed);
     }
 
+    /**
+     * Fetches the average rating for a book
+     *
+     * @param bookId the id of the book
+     * @return the average rating of the book
+     */
+    @GetMapping("/book/{bookId}/average-rating")
+    public ResponseEntity<Double> getAverageRating(@PathVariable Long bookId) {
+        double averageRating = reviewService.getAverageRatingByBookId(bookId);
+
+        return ResponseEntity.ok(averageRating);
+    }
+
 
 }
