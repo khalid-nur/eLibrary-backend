@@ -6,6 +6,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * Repository for managing reviews
  */
@@ -31,5 +33,11 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
      */
     Review findByUserEmailAndBookId(String userEmail, Long bookId);
 
-
+    /**
+     * Finds all reviews for a book id
+     *
+     * @param bookId the id of the book to fetch all reviews for
+     * @return list of all reviews for the specified book
+     */
+    List<Review> findAllByBookId(Long bookId);
 }
