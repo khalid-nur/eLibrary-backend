@@ -1,5 +1,6 @@
 package com.elibrary.backend.modules.review.service;
 
+import com.elibrary.backend.modules.review.dto.CreateReviewRequest;
 import com.elibrary.backend.modules.review.entity.Review;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,5 +35,13 @@ public interface ReviewService {
      * @return the average rating, or 0.0 if there are no reviews
      */
     double getAverageRatingByBookId(Long bookId);
+
+    /**
+     * Creates a new review for a book by a user
+     *
+     * @param userEmail     the email address of the user
+     * @param reviewRequest the review data including rating, book ID, and optional description
+     */
+    void postReview(String userEmail, CreateReviewRequest reviewRequest);
 
 }
