@@ -1,10 +1,13 @@
 package com.elibrary.backend.modules.review.controller;
 
+import com.elibrary.backend.modules.review.dto.CreateReviewRequest;
 import com.elibrary.backend.modules.review.entity.Review;
 import com.elibrary.backend.modules.review.service.ReviewService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -64,5 +67,18 @@ public class ReviewController {
         return ResponseEntity.ok(averageRating);
     }
 
-
+    /**
+     * Creates a new review for a book by a user
+     *
+     * @param userDetails   the authenticated user
+     * @param reviewRequest the review data to be submitted for a book
+     * @return a response with 201 status when successful
+     */
+    @PostMapping
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('USER')")
+    public ResponseEntity<Void> postReview(@AuthenticationPrincipal UserDetails userDetails,
+                                           @Valid @RequestBody CreateReviewRequest reviewRequest) {
+        reviewService.postReview(userDetails.getUsername(), reviewRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
 }
