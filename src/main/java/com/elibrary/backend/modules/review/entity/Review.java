@@ -32,6 +32,7 @@ public class Review {
     @Column(name = "book_id")
     private Long bookId;
 
-    @Column(name = "review_description")
+    @Lob
+    @Column(name = "review_description", columnDefinition = "TEXT")
     private String reviewDescription;
 }
