@@ -9,7 +9,9 @@ import com.elibrary.backend.modules.auth.exception.UserAlreadyExistsException;
 import com.elibrary.backend.modules.auth.mapper.UserMapper;
 import com.elibrary.backend.modules.auth.repository.UserRepository;
 import com.elibrary.backend.modules.auth.service.AuthService;
+import com.elibrary.backend.modules.auth.service.TokenBlacklistService;
 import com.elibrary.backend.security.JwtTokenProvider;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -38,6 +40,8 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
 
     private final JwtTokenProvider jwtTokenProvider;
+
+    private final TokenBlacklistService tokenBlacklistService;
 
 
     /**
@@ -102,6 +106,25 @@ public class AuthServiceImpl implements AuthService {
 
     }
 
+
+    /**
+     * Logs out the user by extracting the JWT token from the request and
+     * preventing it from being used in future authenticated requests
+     *
+     * @param request HTTP request containing the Authorization header
+     */
+    @Override
+    public void logout(HttpServletRequest request) {
+
+        // Extract the JWT token from the Authorization header
+        String token = jwtTokenProvider.extractJwtTokenFromRequest(request);
+
+        // If a token is found, store it so it will no longer be accepted for authentication
+        if (token != null && !token.isEmpty()) {
+            tokenBlacklistService.addTokenToBlacklist(token);
+        }
+    }
+
     /**
      * Authenticates a user using the provided credentials
      *
@@ -119,4 +142,6 @@ public class AuthServiceImpl implements AuthService {
             throw new InvalidCredentialsException("Invalid email or password");
         }
     }
+
+
 }

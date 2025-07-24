@@ -3,6 +3,7 @@ package com.elibrary.backend.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -106,5 +107,24 @@ public class JwtTokenProvider {
         // Check if the token is expired by comparing the expiration date to the current time
         // Returns true if the token is expired, false otherwise
         return expiration.before(new Date());
+    }
+
+    /**
+     * Extracts the JWT token from the Authorization header of the HTTP request
+     *
+     * @param request HTTP request containing the Authorization header
+     * @return the JWT token string, or null if no valid token is found
+     */
+    public String extractJwtTokenFromRequest(HttpServletRequest request) {
+
+        // Get the Authorization header value from the request
+        String bearerToken = request.getHeader("Authorization");
+
+        // Check if the header is not null and starts with "Bearer ", if it does return the token
+        if(bearerToken != null && bearerToken.startsWith("Bearer")){
+            return bearerToken.substring(7);
+        }
+
+        return null;
     }
 }

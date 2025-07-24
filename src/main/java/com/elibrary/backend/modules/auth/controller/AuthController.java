@@ -5,6 +5,7 @@ import com.elibrary.backend.modules.auth.mapper.UserMapper;
 import com.elibrary.backend.modules.auth.service.AuthService;
 import com.elibrary.backend.security.CustomUserDetailsService;
 import com.elibrary.backend.security.JwtTokenProvider;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -71,5 +72,17 @@ public class AuthController {
 
         // Return the response with a 200 OK status
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    /**
+     * Logs out the user and invalidates their JWT token
+     *
+     * @param request HTTP request containing the Authorization header
+     */
+    @PostMapping("/logout")
+    public void logout(HttpServletRequest request) {
+
+        // Process the logout by invalidating the token
+        authService.logout(request);
     }
 }

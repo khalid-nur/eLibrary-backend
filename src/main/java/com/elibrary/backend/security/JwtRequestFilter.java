@@ -1,5 +1,6 @@
 package com.elibrary.backend.security;
 
+import com.elibrary.backend.modules.auth.service.TokenBlacklistService;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -25,6 +26,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
 
+    @Autowired
+    private TokenBlacklistService tokenBlacklistService;
+
     /**
      * Processes each request to validate the JWT token and set the authentication context
      *
@@ -45,6 +49,12 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer")) {
             // Extract the token
             jwtToken = requestTokenHeader.substring(7);
+
+            // If the token is stored as no longer accepted, reject the request
+            if(tokenBlacklistService.isTokenBlacklisted(jwtToken)){
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
 
             try {
                 // Extract the email from the JWT token
