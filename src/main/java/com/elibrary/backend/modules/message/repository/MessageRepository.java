@@ -2,6 +2,7 @@ package com.elibrary.backend.modules.message.repository;
 
 import com.elibrary.backend.modules.message.entity.Message;
 import com.elibrary.backend.modules.message.enums.MessageStatus;
+import com.elibrary.backend.modules.user.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,11 +17,11 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     /**
      * Finds messages in the database by user email
      *
-     * @param userEmail the email of the user
+     * @param user the email of the user
      * @param pageable pagination information
      * @return page of messages for the user
      */
-    Page<Message> findByUserEmail( String userEmail, Pageable pageable);
+    Page<Message> findByUser(User user, Pageable pageable);
 
     /**
      * Finds messages in the database by status

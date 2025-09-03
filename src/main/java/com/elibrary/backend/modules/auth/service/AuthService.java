@@ -2,7 +2,7 @@ package com.elibrary.backend.modules.auth.service;
 
 import com.elibrary.backend.modules.auth.dto.AuthRequest;
 import com.elibrary.backend.modules.auth.dto.AuthResponse;
-import com.elibrary.backend.modules.auth.dto.UserDTO;
+import com.elibrary.backend.modules.user.dto.UserDTO;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**

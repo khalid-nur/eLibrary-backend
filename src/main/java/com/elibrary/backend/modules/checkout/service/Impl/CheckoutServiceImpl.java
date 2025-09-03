@@ -4,11 +4,14 @@ import com.elibrary.backend.common.exceptions.DuplicateResourceException;
 import com.elibrary.backend.common.exceptions.ResourceNotFoundExceptions;
 import com.elibrary.backend.modules.book.entity.Book;
 import com.elibrary.backend.modules.book.repository.BookRepository;
+import com.elibrary.backend.modules.checkout.dto.CheckoutCountDTO;
 import com.elibrary.backend.modules.checkout.dto.CurrentLoanResponse;
 import com.elibrary.backend.modules.checkout.entity.Checkout;
 import com.elibrary.backend.modules.checkout.exception.LoanOverdueException;
 import com.elibrary.backend.modules.checkout.repository.CheckoutRepository;
 import com.elibrary.backend.modules.checkout.service.CheckoutService;
+import com.elibrary.backend.modules.user.entity.User;
+import com.elibrary.backend.modules.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -32,6 +35,8 @@ public class CheckoutServiceImpl implements CheckoutService {
 
     private final CheckoutRepository checkoutRepository;
 
+    private final UserRepository userRepository;
+
     private static final int MAX_LOAN_DAYS = 7;
 
     /**
@@ -44,12 +49,16 @@ public class CheckoutServiceImpl implements CheckoutService {
     @Override
     public Book checkoutBookForUser(String userEmail, Long bookId) {
 
+        // Find the user by their email, or throw an exception if not found
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundExceptions("User not found"));
+
         // Find the book by its id, or throw an exception if not found
         Book book = bookRepository.findById(bookId).orElseThrow(
                 () -> new ResourceNotFoundExceptions("The requested book could not be found"));
 
         // Check if the book is already checked out by the user
-        Checkout existingCheckout = checkoutRepository.findByUserEmailAndBookId(userEmail, bookId);
+        Checkout existingCheckout = checkoutRepository.findByUserAndBookId(user, bookId);
 
         // If a user has checked out throw an exception
         if (existingCheckout != null) {
@@ -69,7 +78,7 @@ public class CheckoutServiceImpl implements CheckoutService {
 
         // Create and save a new checkout record
         Checkout checkout = new Checkout();
-        checkout.setUserEmail(userEmail);
+        checkout.setUser(user);
         checkout.setCheckoutDate(LocalDate.now());
         checkout.setReturnDate(LocalDate.now().plusDays(MAX_LOAN_DAYS));
         checkout.setBookId(book.getId());
@@ -91,8 +100,12 @@ public class CheckoutServiceImpl implements CheckoutService {
     @Override
     public boolean isBookCheckedOutByUser(String userEmail, Long bookId) {
 
+        // Find the user by their email, or throw an exception if not found
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundExceptions("User not found"));
+
         // Check if the book is already checked out by the user
-        Checkout existingCheckout = checkoutRepository.findByUserEmailAndBookId(userEmail, bookId);
+        Checkout existingCheckout = checkoutRepository.findByUserAndBookId(user, bookId);
 
         // If found, return true. If not, return false
         return existingCheckout != null;
@@ -107,8 +120,12 @@ public class CheckoutServiceImpl implements CheckoutService {
     @Override
     public int getCurrentLoanCountForUser(String userEmail) {
 
+        // Find the user by their email, or throw an exception if not found
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundExceptions("User not found"));
+
         // Find all checkout records for the user and return the total count
-        return checkoutRepository.findBooksByUserEmail(userEmail).size();
+        return checkoutRepository.findBooksByUser(user).size();
     }
 
     /**
@@ -120,11 +137,15 @@ public class CheckoutServiceImpl implements CheckoutService {
     @Override
     public List<CurrentLoanResponse> getCurrentLoansForUser(String userEmail) {
 
+        // Find the user by their email, or throw an exception if not found
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundExceptions("User not found"));
+
         // Create an empty list to store the details of the books currently on loan
         List<CurrentLoanResponse> currentLoanResponses = new ArrayList<>();
 
         // Get all the user's current checkouts
-        List<Checkout> checkoutList = checkoutRepository.findBooksByUserEmail(userEmail);
+        List<Checkout> checkoutList = checkoutRepository.findBooksByUser(user);
 
         // Get the id of all books the user checked out
         List<Long> bookIdList = checkoutList.stream()
@@ -162,13 +183,17 @@ public class CheckoutServiceImpl implements CheckoutService {
     @Override
     public void returnBookForUser(String userEmail, Long bookId) {
 
+        // Find the user by their email, or throw an exception if not found
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundExceptions("User not found"));
+
         // Find the book by its id. Throw exceptions if not found
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new ResourceNotFoundExceptions("The requested book could not be found"));
 
 
         // Check if a checkout record exists for the user and book
-        Checkout existingCheckout = checkoutRepository.findByUserEmailAndBookId(userEmail, bookId);
+        Checkout existingCheckout = checkoutRepository.findByUserAndBookId(user, bookId);
 
         // If no existing checkout record is found, throw an exception
         if (existingCheckout == null) {
@@ -192,8 +217,12 @@ public class CheckoutServiceImpl implements CheckoutService {
     @Override
     public void renewBookLoanForUser(String userEmail, Long bookId) {
 
+        // Find the user by their email, or throw an exception if not found
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundExceptions("User not found"));
+
         // Check if a checkout record exists for the user and book
-        Checkout existingCheckout = checkoutRepository.findByUserEmailAndBookId(userEmail, bookId);
+        Checkout existingCheckout = checkoutRepository.findByUserAndBookId(user, bookId);
 
         // If no existing checkout record is found, throw an exception
         if (existingCheckout == null) {
@@ -219,5 +248,19 @@ public class CheckoutServiceImpl implements CheckoutService {
 
         // Save the updated checkout record to the database
         checkoutRepository.save(existingCheckout);
+    }
+
+    /**
+     * Fetches the total number of books currently checked out by all users
+     *
+     * @return the total count of all checked-out books
+     */
+    @Override
+    public CheckoutCountDTO getTotalCheckouts() {
+
+        // Get the total count of all checked out
+        long totalCheckouts = checkoutRepository.count();
+
+        return new CheckoutCountDTO(totalCheckouts);
     }
 }

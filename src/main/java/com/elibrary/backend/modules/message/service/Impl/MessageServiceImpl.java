@@ -11,6 +11,8 @@ import com.elibrary.backend.modules.message.enums.MessageStatus;
 import com.elibrary.backend.modules.message.mapper.MessageMapper;
 import com.elibrary.backend.modules.message.repository.MessageRepository;
 import com.elibrary.backend.modules.message.service.MessageService;
+import com.elibrary.backend.modules.user.entity.User;
+import com.elibrary.backend.modules.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -32,6 +34,8 @@ public class MessageServiceImpl implements MessageService {
 
     private final MessageMapper messageMapper;
 
+    private final UserRepository userRepository;
+
     /**
      * Creates a new message for a user
      *
@@ -42,11 +46,15 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public MessageResponseDTO createMessage(MessageRequestDTO messageRequest, String userEmail) {
 
+        // Find the user by their email, or throw an exception if not found
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundExceptions("User not found"));
+
         // Convert the message request DTO into a message entity
         Message message = messageMapper.mapToEntity(messageRequest);
 
         // Set email, status, and timestamps on the message
-        message.setUserEmail(userEmail);
+        message.setUser(user);
         message.setMessageStatus(MessageStatus.PENDING);
         message.setCreatedAt(LocalDate.now());
         message.setUpdatedAt(LocalDate.now());
@@ -66,10 +74,23 @@ public class MessageServiceImpl implements MessageService {
      * @return paginated list of user messages
      */
     @Override
-    public Page<Message> getMessagesForUser(String userEmail, Pageable pageable) {
+    public Page<MessageResponseDTO> getMessagesForUser(String userEmail, Pageable pageable) {
 
-        // Get all messages belonging to the given user
-        return messageRepository.findByUserEmail(userEmail, pageable);
+        // Find the user by their email, or throw an exception if not found
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundExceptions("User not found"));
+
+        // Find messages for the given user
+        Page<Message> messages = messageRepository.findByUser(user, pageable);
+
+        // Convert the list of message entities to message DTOs
+        Page<MessageResponseDTO> messageResponse = messages.map(message -> {
+            MessageResponseDTO messageDTO = messageMapper.mapToResponseDTO(message);
+            return messageDTO;
+        });
+
+        // Return the paginated list of message DTOs
+        return messageResponse;
     }
 
     /**
@@ -79,10 +100,20 @@ public class MessageServiceImpl implements MessageService {
      * @return paginated list of all messages
      */
     @Override
-    public Page<Message> getAllMessages(Pageable pageable) {
+    public Page<MessageResponseDTO> getAllMessages(Pageable pageable) {
 
-        // Get all messages
-        return messageRepository.findAll(pageable);
+        // Find all messages
+        Page<Message> messages = messageRepository.findAll(pageable);
+
+
+        // Convert the list of message entities to message DTOs
+        Page<MessageResponseDTO> messageResponse = messages.map(message -> {
+            MessageResponseDTO messageDTO = messageMapper.mapToResponseDTO(message);
+            return messageDTO;
+        });
+
+        // Return the paginated list of message DTOs
+        return messageResponse;
     }
 
     /**
@@ -93,10 +124,19 @@ public class MessageServiceImpl implements MessageService {
      * @return paginated list of messages with the given status
      */
     @Override
-    public Page<Message> getMessagesByStatus(MessageStatus messageStatus, Pageable pageable) {
+    public Page<MessageResponseDTO> getMessagesByStatus(MessageStatus messageStatus, Pageable pageable) {
 
-        // Get all messages matching the given status
-        return messageRepository.findByMessageStatus(messageStatus, pageable);
+        // Find messages for the given status
+        Page<Message> messages = messageRepository.findByMessageStatus(messageStatus, pageable);
+
+        // Convert the list of message entities to message DTOs
+        Page<MessageResponseDTO> messageResponse = messages.map(message -> {
+            MessageResponseDTO messageDTO = messageMapper.mapToResponseDTO(message);
+            return messageDTO;
+        });
+
+        // Return the paginated list of message DTOs
+        return messageResponse;
     }
 
     /**

@@ -1,6 +1,7 @@
 package com.elibrary.backend.modules.checkout.entity;
 
 
+import com.elibrary.backend.modules.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,8 +23,9 @@ public class Checkout {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "user_email")
-    private String userEmail;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @Column(name = "checkout_date")
     private LocalDate checkoutDate;

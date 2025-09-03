@@ -1,6 +1,7 @@
 package com.elibrary.backend.modules.checkout.service;
 
 import com.elibrary.backend.modules.book.entity.Book;
+import com.elibrary.backend.modules.checkout.dto.CheckoutCountDTO;
 import com.elibrary.backend.modules.checkout.dto.CurrentLoanResponse;
 
 import java.util.List;
@@ -59,6 +60,13 @@ public interface CheckoutService {
      * @param bookId    the id of the book to renew
      */
     void renewBookLoanForUser(String userEmail, Long bookId);
+
+    /**
+     * Fetches the total number of books currently checked out by all users
+     *
+     * @return the total count of all checked-out books
+     */
+    CheckoutCountDTO getTotalCheckouts();
 
 
 }

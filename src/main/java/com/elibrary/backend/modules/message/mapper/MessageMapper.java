@@ -34,6 +34,7 @@ public class MessageMapper {
      * @return the Message entity
      */
     public Message mapToEntity(MessageRequestDTO messageDTO) {
+
         return modelMapper.map(messageDTO, Message.class);
     }
 }

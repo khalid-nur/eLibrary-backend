@@ -1,6 +1,7 @@
 package com.elibrary.backend.modules.checkout.controller;
 
 import com.elibrary.backend.modules.book.entity.Book;
+import com.elibrary.backend.modules.checkout.dto.CheckoutCountDTO;
 import com.elibrary.backend.modules.checkout.dto.CurrentLoanResponse;
 import com.elibrary.backend.modules.checkout.service.CheckoutService;
 import lombok.RequiredArgsConstructor;
@@ -120,5 +121,15 @@ public class Checkout {
 
         checkoutService.renewBookLoanForUser(userEmail, bookId);
         return ResponseEntity.ok("Book loan renewed successfully.");
+    }
+
+    /**
+     * Fetches the total number of books currently checked out by all users
+     *
+     * @return the total count of all checked-out books
+     */    @GetMapping("admin/checkout-counts")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<CheckoutCountDTO> getTotalCheckouts() {
+        return ResponseEntity.ok(checkoutService.getTotalCheckouts());
     }
 }

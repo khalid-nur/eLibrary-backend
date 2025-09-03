@@ -1,6 +1,7 @@
 package com.elibrary.backend.modules.book.service.Impl;
 
 import com.elibrary.backend.common.exceptions.ResourceNotFoundExceptions;
+import com.elibrary.backend.modules.book.dto.BookCountDTO;
 import com.elibrary.backend.modules.book.entity.Book;
 import com.elibrary.backend.modules.book.repository.BookRepository;
 import com.elibrary.backend.modules.book.service.BookService;
@@ -86,4 +87,17 @@ public class BookServiceImpl implements BookService {
         return books;
     }
 
+    /**
+     * Fetches the total number of books
+     *
+     * @return the total count of all books
+     */
+    @Override
+    public BookCountDTO getBookCounts() {
+
+        // Get the total count of all books
+        long totalBooks = bookRepository.count();
+
+        return new BookCountDTO(totalBooks);
+    }
 }

@@ -1,7 +1,7 @@
 package com.elibrary.backend.modules.review.service;
 
 import com.elibrary.backend.modules.review.dto.CreateReviewRequest;
-import com.elibrary.backend.modules.review.entity.Review;
+import com.elibrary.backend.modules.review.dto.ReviewDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -17,7 +17,7 @@ public interface ReviewService {
      * @param pageable pagination information
      * @return paginated list of reviews for the specified book
      */
-    Page<Review> getReviewsByBookId(Long bookId, Pageable pageable);
+    Page<ReviewDTO> getReviewsByBookId(Long bookId, Pageable pageable);
 
     /**
      * Checks if the user has submitted a review for a book

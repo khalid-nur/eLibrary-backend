@@ -1,6 +1,6 @@
-package com.elibrary.backend.modules.auth.repository;
+package com.elibrary.backend.modules.user.repository;
 
-import com.elibrary.backend.modules.auth.entity.User;
+import com.elibrary.backend.modules.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -27,5 +27,14 @@ public interface UserRepository extends JpaRepository<User,Long> {
      * @return True if a user with the given email exists, false if no such user is found
      */
     boolean existsByEmail(String email);
+
+    /**
+     * Finds a user by their user id in the database
+     *
+     * @param userId The user id of the user
+     * @return Optional containing the User if found, or empty if not found
+     */
+    Optional<User> findByUserId(String userId);
+
 
 }

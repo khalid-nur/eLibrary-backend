@@ -2,12 +2,12 @@ package com.elibrary.backend.modules.auth.service.Impl;
 
 import com.elibrary.backend.modules.auth.dto.AuthRequest;
 import com.elibrary.backend.modules.auth.dto.AuthResponse;
-import com.elibrary.backend.modules.auth.dto.UserDTO;
-import com.elibrary.backend.modules.auth.entity.User;
+import com.elibrary.backend.modules.user.dto.UserDTO;
+import com.elibrary.backend.modules.user.entity.User;
 import com.elibrary.backend.modules.auth.exception.InvalidCredentialsException;
 import com.elibrary.backend.modules.auth.exception.UserAlreadyExistsException;
-import com.elibrary.backend.modules.auth.mapper.UserMapper;
-import com.elibrary.backend.modules.auth.repository.UserRepository;
+import com.elibrary.backend.modules.user.mapper.UserMapper;
+import com.elibrary.backend.modules.user.repository.UserRepository;
 import com.elibrary.backend.modules.auth.service.AuthService;
 import com.elibrary.backend.modules.auth.service.TokenBlacklistService;
 import com.elibrary.backend.security.JwtTokenProvider;

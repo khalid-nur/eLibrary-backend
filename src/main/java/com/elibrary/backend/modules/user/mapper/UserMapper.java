@@ -1,9 +1,9 @@
-package com.elibrary.backend.modules.auth.mapper;
+package com.elibrary.backend.modules.user.mapper;
 
 import com.elibrary.backend.modules.auth.dto.RegisterUserRequest;
 import com.elibrary.backend.modules.auth.dto.RegisterUserResponse;
-import com.elibrary.backend.modules.auth.dto.UserDTO;
-import com.elibrary.backend.modules.auth.entity.User;
+import com.elibrary.backend.modules.user.dto.UserDTO;
+import com.elibrary.backend.modules.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
@@ -44,9 +44,4 @@ public class UserMapper {
     public UserDTO toUserDTOFromUser (User user){
         return modelMapper.map(user, UserDTO.class);
     }
-
-
-
-
-
 }

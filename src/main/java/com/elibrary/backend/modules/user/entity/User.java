@@ -1,5 +1,8 @@
-package com.elibrary.backend.modules.auth.entity;
+package com.elibrary.backend.modules.user.entity;
 
+import com.elibrary.backend.modules.checkout.entity.Checkout;
+import com.elibrary.backend.modules.message.entity.Message;
+import com.elibrary.backend.modules.review.entity.Review;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -48,6 +51,16 @@ public class User implements UserDetails {
 
     @UpdateTimestamp
     private Timestamp updatedAt;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Message> messages;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> reviews;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Checkout> checkouts;
+
 
 
     @Override

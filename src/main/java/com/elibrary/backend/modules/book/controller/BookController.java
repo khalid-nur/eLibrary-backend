@@ -1,11 +1,13 @@
 package com.elibrary.backend.modules.book.controller;
 
+import com.elibrary.backend.modules.book.dto.BookCountDTO;
 import com.elibrary.backend.modules.book.entity.Book;
 import com.elibrary.backend.modules.book.service.BookService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -68,6 +70,16 @@ public class BookController {
     public ResponseEntity<Page<Book>> getBooksByCategory(@RequestParam String category, Pageable pageable) {
         Page<Book> books = bookService.getBooksByCategory(category, pageable);
         return ResponseEntity.ok(books);
+    }
+
+    /**
+     * Fetches the total number of books currently checked out by all users
+     *
+     * @return the total count of all checked-out books
+     */    @GetMapping("admin/book-counts")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<BookCountDTO> getBookCounts() {
+        return ResponseEntity.ok(bookService.getBookCounts());
     }
 
 }

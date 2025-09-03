@@ -1,7 +1,7 @@
 package com.elibrary.backend.modules.review.controller;
 
 import com.elibrary.backend.modules.review.dto.CreateReviewRequest;
-import com.elibrary.backend.modules.review.entity.Review;
+import com.elibrary.backend.modules.review.dto.ReviewDTO;
 import com.elibrary.backend.modules.review.service.ReviewService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,8 +32,8 @@ public class ReviewController {
      * @return paginated list of reviews for the specified book
      */
     @GetMapping("/book/{bookId}")
-    public ResponseEntity<Page<Review>> getReviewsByBookId(@PathVariable Long bookId, Pageable pageable) {
-        Page<Review> reviews = reviewService.getReviewsByBookId(bookId, pageable);
+    public ResponseEntity<Page<ReviewDTO>> getReviewsByBookId(@PathVariable Long bookId, Pageable pageable) {
+        Page<ReviewDTO> reviews = reviewService.getReviewsByBookId(bookId, pageable);
 
         return ResponseEntity.ok(reviews);
     }

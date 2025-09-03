@@ -16,6 +16,9 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Builder
 public class MessageResponseDTO {
+    private Long id;
+
+    private String userName;
 
     private String userEmail;
 
