@@ -4,9 +4,13 @@ import com.elibrary.backend.common.exceptions.DuplicateResourceException;
 import com.elibrary.backend.common.exceptions.ResourceNotFoundExceptions;
 import com.elibrary.backend.modules.book.repository.BookRepository;
 import com.elibrary.backend.modules.review.dto.CreateReviewRequest;
+import com.elibrary.backend.modules.review.dto.ReviewDTO;
 import com.elibrary.backend.modules.review.entity.Review;
+import com.elibrary.backend.modules.review.mapper.ReviewMapper;
 import com.elibrary.backend.modules.review.repository.ReviewRepository;
 import com.elibrary.backend.modules.review.service.ReviewService;
+import com.elibrary.backend.modules.user.entity.User;
+import com.elibrary.backend.modules.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -26,7 +30,13 @@ import java.util.List;
 public class ReviewServiceImpl implements ReviewService {
 
     private final ReviewRepository reviewRepository;
+
     private final BookRepository bookRepository;
+
+    private final UserRepository userRepository;
+
+    private final ReviewMapper reviewMapper;
+
 
     /**
      * Fetches a paginated list of reviews for a specific book id
@@ -36,8 +46,24 @@ public class ReviewServiceImpl implements ReviewService {
      * @return paginated list of reviews for the specified book
      */
     @Override
-    public Page<Review> getReviewsByBookId(Long bookId, Pageable pageable) {
-        return reviewRepository.findByBookId(bookId, pageable);
+    public Page<ReviewDTO> getReviewsByBookId(Long bookId, Pageable pageable) {
+
+        // Find reviews for the given book id
+        Page<Review> reviews = reviewRepository.findByBookId(bookId, pageable);
+
+        // If no reviews found and book does not exist, throw not found exception
+        if (reviews.isEmpty() && !bookRepository.existsById(bookId)) {
+            throw new ResourceNotFoundExceptions("The requested book could not be found");
+        }
+
+        // Convert the list of review entities to review DTOs
+        Page<ReviewDTO> reviewResponse = reviews.map(review -> {
+            ReviewDTO reviewDTO = reviewMapper.toReviewDTOFromReview(review);
+            return reviewDTO;
+        });
+
+        // Return the paginated list of review DTOs
+        return reviewResponse;
     }
 
     /**
@@ -49,8 +75,15 @@ public class ReviewServiceImpl implements ReviewService {
      */
     @Override
     public boolean isBookReviewedByUser(String userEmail, Long bookId) {
-        Review existingReview = reviewRepository.findByUserEmailAndBookId(userEmail, bookId);
 
+        // Find the user by their email, or throw an exception if not found
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundExceptions("User not found"));
+
+        // Check if the book exists by its id
+        Review existingReview = reviewRepository.findByUserAndBookId(user, bookId);
+
+        // Return true if a review by user for the given book exists, else false
         return existingReview != null;
 
     }
@@ -101,13 +134,17 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public void postReview(String userEmail, CreateReviewRequest reviewRequest) {
 
+        // Find the user by their email, or throw an exception if not found
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundExceptions("User not found"));
+
         // Check if the book ID exists, or throw an exception if not found
         if (!bookRepository.existsById(reviewRequest.getBookId())) {
             throw new ResourceNotFoundExceptions("The book provided for review does not exist");
         }
 
         // Check if a review by this user for the given book already exists
-        Review existingReview = reviewRepository.findByUserEmailAndBookId(userEmail, reviewRequest.getBookId());
+        Review existingReview = reviewRepository.findByUserAndBookId(user, reviewRequest.getBookId());
 
         // If a review already exists, throw a duplication exception
         if (existingReview != null) {
@@ -118,7 +155,7 @@ public class ReviewServiceImpl implements ReviewService {
         Review review = new Review();
         review.setBookId(reviewRequest.getBookId());
         review.setRating(reviewRequest.getRating());
-        review.setUserEmail(userEmail);
+        review.setUser(user);
 
         // Set the review description if it contains text, else set it null
         review.setReviewDescription(StringUtils.hasText(reviewRequest.getDescription())

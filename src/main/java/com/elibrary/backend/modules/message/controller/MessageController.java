@@ -4,7 +4,6 @@ import com.elibrary.backend.modules.message.dto.AdminReplyRequestDTO;
 import com.elibrary.backend.modules.message.dto.MessageCountsDTO;
 import com.elibrary.backend.modules.message.dto.MessageRequestDTO;
 import com.elibrary.backend.modules.message.dto.MessageResponseDTO;
-import com.elibrary.backend.modules.message.entity.Message;
 import com.elibrary.backend.modules.message.enums.MessageStatus;
 import com.elibrary.backend.modules.message.service.MessageService;
 import jakarta.validation.Valid;
@@ -57,11 +56,11 @@ public class MessageController {
      */
     @GetMapping
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('USER')")
-    public ResponseEntity<Page<Message>> getUserMessages(@AuthenticationPrincipal UserDetails userDetails,
+    public ResponseEntity<Page<MessageResponseDTO>> getUserMessages(@AuthenticationPrincipal UserDetails userDetails,
                                                          Pageable pageable) {
         String userEmail = userDetails.getUsername();
 
-        Page<Message> messages = messageService.getMessagesForUser(userEmail, pageable);
+        Page<MessageResponseDTO> messages = messageService.getMessagesForUser(userEmail, pageable);
 
         return ResponseEntity.ok(messages);
     }
@@ -74,8 +73,8 @@ public class MessageController {
      */
     @GetMapping("admin/messages")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<Page<Message>> getAllMessages(Pageable pageable) {
-        Page<Message> messages = messageService.getAllMessages(pageable);
+    public ResponseEntity<Page<MessageResponseDTO>> getAllMessages(Pageable pageable) {
+        Page<MessageResponseDTO> messages = messageService.getAllMessages(pageable);
         return ResponseEntity.ok(messages);
     }
 
@@ -88,7 +87,7 @@ public class MessageController {
      */
     @GetMapping("/admin/messages/filter")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<Page<Message>> getMessagesByStatus(@RequestParam MessageStatus status,
+    public ResponseEntity<Page<MessageResponseDTO>> getMessagesByStatus(@RequestParam MessageStatus status,
                                                              Pageable pageable) {
         return ResponseEntity.ok(messageService.getMessagesByStatus(status, pageable));
     }

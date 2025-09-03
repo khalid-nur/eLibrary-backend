@@ -35,9 +35,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain (HttpSecurity httpSecurity) throws Exception{
         return httpSecurity.csrf(csrf -> csrf.disable())
+                .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/auth/**","/books/**", "/reviews/**","/checkouts/**","/messages/**")
-                .permitAll().anyRequest().authenticated())
+                .permitAll()
+                        .requestMatchers("/admin/**")  // restrict all /admin URLs
+                        .hasAuthority("ADMIN")
+                        .anyRequest().authenticated())
                 .sessionManagement((session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)))
                 .httpBasic(Customizer.withDefaults())

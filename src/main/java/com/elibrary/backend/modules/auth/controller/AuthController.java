@@ -1,7 +1,8 @@
 package com.elibrary.backend.modules.auth.controller;
 
 import com.elibrary.backend.modules.auth.dto.*;
-import com.elibrary.backend.modules.auth.mapper.UserMapper;
+import com.elibrary.backend.modules.user.dto.UserDTO;
+import com.elibrary.backend.modules.user.mapper.UserMapper;
 import com.elibrary.backend.modules.auth.service.AuthService;
 import com.elibrary.backend.security.CustomUserDetailsService;
 import com.elibrary.backend.security.JwtTokenProvider;

@@ -1,7 +1,7 @@
 package com.elibrary.backend.security;
 
-import com.elibrary.backend.modules.auth.entity.User;
-import com.elibrary.backend.modules.auth.repository.UserRepository;
+import com.elibrary.backend.modules.user.entity.User;
+import com.elibrary.backend.modules.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;

@@ -1,6 +1,7 @@
 package com.elibrary.backend.modules.review.repository;
 
 import com.elibrary.backend.modules.review.entity.Review;
+import com.elibrary.backend.modules.user.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -27,11 +28,11 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     /**
      * Finds a review submitted by a user for a book
      *
-     * @param userEmail the email of the user
+     * @param user the email of the user
      * @param bookId    the id of the book to check review status for
      * @return the matching review, or null if not found
      */
-    Review findByUserEmailAndBookId(String userEmail, Long bookId);
+    Review findByUserAndBookId(User user, Long bookId);
 
     /**
      * Finds all reviews for a book id

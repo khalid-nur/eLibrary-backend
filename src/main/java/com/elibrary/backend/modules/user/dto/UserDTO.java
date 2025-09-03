@@ -1,4 +1,4 @@
-package com.elibrary.backend.modules.auth.dto;
+package com.elibrary.backend.modules.user.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,13 +8,16 @@ import lombok.NoArgsConstructor;
 import java.sql.Timestamp;
 
 /**
- * Contains user information for safe transfer within the application
+ * Represents a user in the system
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class UserDTO {
+
+    private String id;
+
     private String userId;
 
     private String email;

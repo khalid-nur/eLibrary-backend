@@ -1,5 +1,6 @@
 package com.elibrary.backend.modules.book.service;
 
+import com.elibrary.backend.modules.book.dto.BookCountDTO;
 import com.elibrary.backend.modules.book.entity.Book;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -47,5 +48,10 @@ public interface BookService {
      */
     Page<Book> getBooksByCategory(String category, Pageable pageable);
 
-
+    /**
+     * Fetches the total number of books
+     *
+     * @return the total count of all books
+     */
+    BookCountDTO getBookCounts();
 }

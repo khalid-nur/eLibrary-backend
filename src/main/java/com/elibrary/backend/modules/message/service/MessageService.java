@@ -4,7 +4,6 @@ import com.elibrary.backend.modules.message.dto.AdminReplyRequestDTO;
 import com.elibrary.backend.modules.message.dto.MessageCountsDTO;
 import com.elibrary.backend.modules.message.dto.MessageRequestDTO;
 import com.elibrary.backend.modules.message.dto.MessageResponseDTO;
-import com.elibrary.backend.modules.message.entity.Message;
 import com.elibrary.backend.modules.message.enums.MessageStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,7 +29,7 @@ public interface MessageService {
      * @param pageable  pagination info like page number and size
      * @return paginated list of user messages
      */
-    Page<Message> getMessagesForUser(String userEmail, Pageable pageable);
+    Page<MessageResponseDTO> getMessagesForUser(String userEmail, Pageable pageable);
 
     /**
      * Fetches all messages in the system (admin only)
@@ -38,7 +37,7 @@ public interface MessageService {
      * @param pageable pagination info like page number and size
      * @return paginated list of all messages
      */
-    Page<Message> getAllMessages(Pageable pageable);
+    Page<MessageResponseDTO> getAllMessages(Pageable pageable);
 
     /**
      * Fetches messages filtered by their status (admin only)
@@ -47,7 +46,7 @@ public interface MessageService {
      * @param pageable      pagination info like page number and size
      * @return paginated list of messages with the given status
      */
-    Page<Message> getMessagesByStatus(MessageStatus messageStatus, Pageable pageable);
+    Page<MessageResponseDTO> getMessagesByStatus(MessageStatus messageStatus, Pageable pageable);
 
     /**
      * Counts the number of messages by status (admin only)

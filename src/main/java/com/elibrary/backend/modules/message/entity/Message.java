@@ -1,6 +1,7 @@
 package com.elibrary.backend.modules.message.entity;
 
 import com.elibrary.backend.modules.message.enums.MessageStatus;
+import com.elibrary.backend.modules.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,8 +24,9 @@ public class Message {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "user_email")
-    private String userEmail;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @Column(name = "title")
     private String title;
