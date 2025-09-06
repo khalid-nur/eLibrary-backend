@@ -1,5 +1,6 @@
 package com.elibrary.backend.modules.user.service.Impl;
 
+import com.elibrary.backend.common.exceptions.DuplicateResourceException;
 import com.elibrary.backend.common.exceptions.ResourceNotFoundExceptions;
 import com.elibrary.backend.modules.user.dto.AdminUpdateUserRequest;
 import com.elibrary.backend.modules.user.dto.UserCountDTO;
@@ -76,6 +77,12 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundExceptions("User not found"));
 
+        // If another user already has this email, throw exception
+        if(userRepository.existsByEmail(adminUpdateUserRequest.getEmail())
+                && !user.getEmail().equals(adminUpdateUserRequest.getEmail())){
+            throw new DuplicateResourceException("A user with this email already exists");
+
+        }
 
         // Update the existing user's details with the new values
         user.setName(adminUpdateUserRequest.getName());
