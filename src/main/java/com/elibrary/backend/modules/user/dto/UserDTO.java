@@ -16,7 +16,7 @@ import java.sql.Timestamp;
 @Builder
 public class UserDTO {
 
-    private String id;
+    private Long id;
 
     private String userId;
 
