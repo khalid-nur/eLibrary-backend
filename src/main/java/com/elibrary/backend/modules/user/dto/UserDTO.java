@@ -24,8 +24,6 @@ public class UserDTO {
 
     private String name;
 
-    private String password;
-
     private String role;
 
     private Timestamp createdAt;

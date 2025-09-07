@@ -2,7 +2,8 @@ package com.elibrary.backend.modules.auth.service;
 
 import com.elibrary.backend.modules.auth.dto.AuthRequest;
 import com.elibrary.backend.modules.auth.dto.AuthResponse;
-import com.elibrary.backend.modules.user.dto.UserDTO;
+import com.elibrary.backend.modules.auth.dto.RegisterUserRequest;
+import com.elibrary.backend.modules.auth.dto.RegisterUserResponse;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
@@ -13,10 +14,10 @@ public interface AuthService {
      /**
       * Creates a new user profile from registration data
       *
-      * @param userDTO User registration data
+      * @param registerUserRequest User registration data
       * @return Newly registered user details
       */
-     UserDTO signUp(UserDTO userDTO);
+     RegisterUserResponse signUp(RegisterUserRequest registerUserRequest);
 
      /**
       * Authenticates a user and JWT token upon successful login
