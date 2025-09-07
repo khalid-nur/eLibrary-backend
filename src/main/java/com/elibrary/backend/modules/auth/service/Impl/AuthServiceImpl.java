@@ -2,14 +2,15 @@ package com.elibrary.backend.modules.auth.service.Impl;
 
 import com.elibrary.backend.modules.auth.dto.AuthRequest;
 import com.elibrary.backend.modules.auth.dto.AuthResponse;
-import com.elibrary.backend.modules.user.dto.UserDTO;
-import com.elibrary.backend.modules.user.entity.User;
+import com.elibrary.backend.modules.auth.dto.RegisterUserRequest;
+import com.elibrary.backend.modules.auth.dto.RegisterUserResponse;
 import com.elibrary.backend.modules.auth.exception.InvalidCredentialsException;
 import com.elibrary.backend.modules.auth.exception.UserAlreadyExistsException;
-import com.elibrary.backend.modules.user.mapper.UserMapper;
-import com.elibrary.backend.modules.user.repository.UserRepository;
+import com.elibrary.backend.modules.auth.mapper.AuthMapper;
 import com.elibrary.backend.modules.auth.service.AuthService;
 import com.elibrary.backend.modules.auth.service.TokenBlacklistService;
+import com.elibrary.backend.modules.user.entity.User;
+import com.elibrary.backend.modules.user.repository.UserRepository;
 import com.elibrary.backend.security.JwtTokenProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +36,9 @@ public class AuthServiceImpl implements AuthService {
 
     private final PasswordEncoder passwordEncoder;
 
-    private final UserMapper userMapper;
+//    private final UserMapper userMapper;
+
+    private final AuthMapper authMapper;
 
     private final AuthenticationManager authenticationManager;
 
@@ -47,24 +50,25 @@ public class AuthServiceImpl implements AuthService {
     /**
      * Registers a new user from registration details
      *
-     * @param userDTO Contains registration details to be saved to the database
-     * @return A UserDTO containing the saved user’s details, including the UUID generated user id
+     * @param registerUserRequest Contains registration details to be saved to the database
+     * @return A RegisterUserResponse containing the saved user’s details, including the UUID generated user id
      */
     @Override
-    public UserDTO signUp(UserDTO userDTO) {
+    public RegisterUserResponse signUp(RegisterUserRequest registerUserRequest) {
         // Check if email already exists
-        if (userRepository.existsByEmail(userDTO.getEmail())) {
+        if (userRepository.existsByEmail(registerUserRequest.getEmail())) {
             throw new UserAlreadyExistsException("Email already exists");
         }
 
-        // Convert userDTO to User entity for database
-        User user = userMapper.toUserFromDTO(userDTO);
+        // Convert register request to User entity for database
+        User user = authMapper.toUserFromRegisterRequest(registerUserRequest);
+
 
         // Generate unique UUID for the new user
         user.setUserId(UUID.randomUUID().toString());
 
         // Encode the password
-        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        user.setPassword(passwordEncoder.encode(registerUserRequest.getPassword()));
 
         // Set default role to USER if no role is provided
         if (user.getRole() == null || user.getRole().isEmpty()) {
@@ -74,8 +78,8 @@ public class AuthServiceImpl implements AuthService {
         // Save the user to the database
         user = userRepository.save(user);
 
-        // Convert the saved User entity back to a UserDTO for the response
-        return userMapper.toUserDTOFromUser(user);
+        // Convert the saved User entity back to a RegisterUserResponse for the response
+        return authMapper.toRegisterUserResponseFromUser(user);
     }
 
     /**
