@@ -2,6 +2,7 @@ package com.elibrary.backend.modules.checkout.controller;
 
 import com.elibrary.backend.modules.book.entity.Book;
 import com.elibrary.backend.modules.checkout.dto.CheckoutCountDTO;
+import com.elibrary.backend.modules.checkout.dto.CheckoutPerUserDTO;
 import com.elibrary.backend.modules.checkout.dto.CurrentLoanResponse;
 import com.elibrary.backend.modules.checkout.service.CheckoutService;
 import lombok.RequiredArgsConstructor;
@@ -131,5 +132,16 @@ public class Checkout {
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<CheckoutCountDTO> getTotalCheckouts() {
         return ResponseEntity.ok(checkoutService.getTotalCheckouts());
+    }
+
+    /**
+     * Fetches the number of books checked out by each user
+     *
+     * @return a list of users with their checkout counts
+     */
+    @GetMapping("admin/checkout-counts-per-user")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<List<CheckoutPerUserDTO>> getUserCheckoutCounts() {
+        return ResponseEntity.ok(checkoutService.getUserCheckoutCounts());
     }
 }

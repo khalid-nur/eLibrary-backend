@@ -2,6 +2,7 @@ package com.elibrary.backend.modules.checkout.service;
 
 import com.elibrary.backend.modules.book.entity.Book;
 import com.elibrary.backend.modules.checkout.dto.CheckoutCountDTO;
+import com.elibrary.backend.modules.checkout.dto.CheckoutPerUserDTO;
 import com.elibrary.backend.modules.checkout.dto.CurrentLoanResponse;
 
 import java.util.List;
@@ -67,6 +68,13 @@ public interface CheckoutService {
      * @return the total count of all checked-out books
      */
     CheckoutCountDTO getTotalCheckouts();
+
+    /**
+     * Fetches the number of books currently checked out by each user
+     *
+     * @return a list of objects containing the user ID, email and total number of checkouts
+     */
+    List<CheckoutPerUserDTO> getUserCheckoutCounts();
 
 
 }
