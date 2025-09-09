@@ -5,6 +5,7 @@ import com.elibrary.backend.common.exceptions.ResourceNotFoundExceptions;
 import com.elibrary.backend.modules.book.entity.Book;
 import com.elibrary.backend.modules.book.repository.BookRepository;
 import com.elibrary.backend.modules.checkout.dto.CheckoutCountDTO;
+import com.elibrary.backend.modules.checkout.dto.CheckoutPerUserDTO;
 import com.elibrary.backend.modules.checkout.dto.CurrentLoanResponse;
 import com.elibrary.backend.modules.checkout.entity.Checkout;
 import com.elibrary.backend.modules.checkout.exception.LoanOverdueException;
@@ -262,5 +263,29 @@ public class CheckoutServiceImpl implements CheckoutService {
         long totalCheckouts = checkoutRepository.count();
 
         return new CheckoutCountDTO(totalCheckouts);
+    }
+
+    /**
+     * Fetches the number of books currently checked out by each user
+     *
+     * @return a list of objects containing the user ID, email and total number of checkouts
+     */
+    @Override
+    public List<CheckoutPerUserDTO> getUserCheckoutCounts() {
+        List<User> users = userRepository.findAll();
+
+        List<CheckoutPerUserDTO> checkoutPerUser = users.stream().map(
+                user -> {
+
+                    String userId = user.getUserId();
+
+                    String userEmail = user.getEmail();
+
+                    long totalCheckouts = checkoutRepository.findBooksByUser(user).size();
+
+                    return new CheckoutPerUserDTO(userId, userEmail, totalCheckouts);
+                }).toList();
+
+        return checkoutPerUser;
     }
 }
