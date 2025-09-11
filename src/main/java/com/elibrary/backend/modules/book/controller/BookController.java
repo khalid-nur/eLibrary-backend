@@ -1,8 +1,10 @@
 package com.elibrary.backend.modules.book.controller;
 
 import com.elibrary.backend.modules.book.dto.BookCountDTO;
+import com.elibrary.backend.modules.book.dto.BookRequestDTO;
 import com.elibrary.backend.modules.book.entity.Book;
 import com.elibrary.backend.modules.book.service.BookService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -80,6 +82,20 @@ public class BookController {
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<BookCountDTO> getBookCounts() {
         return ResponseEntity.ok(bookService.getBookCounts());
+    }
+
+
+    /**
+     * Creates a new book
+     *
+     * @param request book request DTO containing the book details
+     * @return newly created book with all details
+     */
+    @PostMapping
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<Book> createBook(@Valid @RequestBody BookRequestDTO request) {
+        Book savedBook = bookService.createBook(request);
+        return ResponseEntity.ok(savedBook);
     }
 
 }

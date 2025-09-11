@@ -2,6 +2,7 @@ package com.elibrary.backend.modules.book.service.Impl;
 
 import com.elibrary.backend.common.exceptions.ResourceNotFoundExceptions;
 import com.elibrary.backend.modules.book.dto.BookCountDTO;
+import com.elibrary.backend.modules.book.dto.BookRequestDTO;
 import com.elibrary.backend.modules.book.entity.Book;
 import com.elibrary.backend.modules.book.repository.BookRepository;
 import com.elibrary.backend.modules.book.service.BookService;
@@ -100,4 +101,26 @@ public class BookServiceImpl implements BookService {
 
         return new BookCountDTO(totalBooks);
     }
+
+    /**
+     * Creates a new book
+     *
+     * @param request a book request DTO containing the book details
+     * @return the newly created book with all details saved in the database
+     */
+    @Override
+    public Book createBook(BookRequestDTO request) {
+        Book book = new Book();
+        book.setTitle(request.getTitle());
+        book.setAuthor(request.getAuthor());
+        book.setDescription(request.getDescription());
+        book.setCopies(request.getCopies());
+        book.setCopiesAvailable(request.getCopiesAvailable());
+        book.setCategory(request.getCategory());
+        book.setImg(request.getImg());
+
+        return bookRepository.save(book);
+    }
 }
+
+
