@@ -1,6 +1,7 @@
 package com.elibrary.backend.modules.book.service;
 
 import com.elibrary.backend.modules.book.dto.BookCountDTO;
+import com.elibrary.backend.modules.book.dto.BookRequestDTO;
 import com.elibrary.backend.modules.book.entity.Book;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -54,4 +55,12 @@ public interface BookService {
      * @return the total count of all books
      */
     BookCountDTO getBookCounts();
+
+    /**
+     * Creates a new book
+     *
+     * @param request a book request DTO containing the book details
+     * @return the newly created book with all details
+     */
+    Book createBook(BookRequestDTO request);
 }
