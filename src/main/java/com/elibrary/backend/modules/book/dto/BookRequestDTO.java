@@ -9,7 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Represents an admin request to create a book
+ * Represents an admin request for creating or updating a book
  */
 @Data
 @AllArgsConstructor

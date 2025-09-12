@@ -98,4 +98,19 @@ public class BookController {
         return ResponseEntity.ok(savedBook);
     }
 
+    /**
+     * Updates an existing book
+     *
+     * @param id the id of the book to update
+     * @param request book request DTO containing the updated book details
+     * @return the updated book with all details
+     */
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<Book> updateBook(@PathVariable Long id,
+                                           @Valid @RequestBody BookRequestDTO request) {
+        Book updatedBook = bookService.updateBook(id, request);
+        return ResponseEntity.ok(updatedBook);
+    }
+
 }

@@ -59,7 +59,7 @@ public class BookServiceImpl implements BookService {
     /**
      * Fetches a list of books by title with pagination
      *
-     * @param title The text to search for in book titles
+     * @param title    The text to search for in book titles
      * @param pageable Pagination info like page number and size
      * @return A paginated list of books matching the search text
      */
@@ -111,6 +111,29 @@ public class BookServiceImpl implements BookService {
     @Override
     public Book createBook(BookRequestDTO request) {
         Book book = new Book();
+        book.setTitle(request.getTitle());
+        book.setAuthor(request.getAuthor());
+        book.setDescription(request.getDescription());
+        book.setCopies(request.getCopies());
+        book.setCopiesAvailable(request.getCopiesAvailable());
+        book.setCategory(request.getCategory());
+        book.setImg(request.getImg());
+
+        return bookRepository.save(book);
+    }
+
+    /**
+     * Updates an existing book
+     *
+     * @param id      the id of the book to update
+     * @param request a book request DTO containing the updated book details
+     * @return the updated book with all details saved in the database
+     */
+    @Override
+    public Book updateBook(Long id, BookRequestDTO request) {
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundExceptions("The requested book could not be found"));
+
         book.setTitle(request.getTitle());
         book.setAuthor(request.getAuthor());
         book.setDescription(request.getDescription());
