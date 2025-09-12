@@ -63,4 +63,13 @@ public interface BookService {
      * @return the newly created book with all details
      */
     Book createBook(BookRequestDTO request);
+
+    /**
+     * Updates an existing book
+     *
+     * @param id the id of the book to update
+     * @param request a book request DTO containing the updated book details
+     * @return the updated book with all details
+     */
+    Book updateBook(Long id, BookRequestDTO request);
 }
