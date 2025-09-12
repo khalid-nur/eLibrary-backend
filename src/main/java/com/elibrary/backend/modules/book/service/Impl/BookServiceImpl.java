@@ -130,8 +130,8 @@ public class BookServiceImpl implements BookService {
      * @return the updated book with all details saved in the database
      */
     @Override
-    public Book updateBook(Long id, BookRequestDTO request) {
-        Book book = bookRepository.findById(id)
+    public Book updateBook(Long bookId, BookRequestDTO request) {
+        Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new ResourceNotFoundExceptions("The requested book could not be found"));
 
         book.setTitle(request.getTitle());
@@ -144,6 +144,20 @@ public class BookServiceImpl implements BookService {
 
         return bookRepository.save(book);
     }
+
+    /**
+     * Deletes a book by id
+     *
+     * @param bookId the id of the book to delete
+     */
+    @Override
+    public void deleteBook(Long bookId) {
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new ResourceNotFoundExceptions("The requested book could not be found"));
+
+        bookRepository.delete(book);
+    }
+
 }
 
 

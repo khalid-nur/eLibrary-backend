@@ -101,16 +101,29 @@ public class BookController {
     /**
      * Updates an existing book
      *
-     * @param id the id of the book to update
+     * @param bookId the id of the book to update
      * @param request book request DTO containing the updated book details
      * @return the updated book with all details
      */
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<Book> updateBook(@PathVariable Long id,
+    public ResponseEntity<Book> updateBook(@PathVariable Long bookId,
                                            @Valid @RequestBody BookRequestDTO request) {
-        Book updatedBook = bookService.updateBook(id, request);
+        Book updatedBook = bookService.updateBook(bookId, request);
         return ResponseEntity.ok(updatedBook);
+    }
+
+    /**
+     * Deletes an existing book
+     *
+     * @param bookId the id of the book to delete
+     * @return  confirmation book has been deleted
+     */
+    @DeleteMapping("/{bookId}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<Void> deleteBook(@PathVariable Long bookId) {
+        bookService.deleteBook(bookId);
+        return ResponseEntity.noContent().build();
     }
 
 }
