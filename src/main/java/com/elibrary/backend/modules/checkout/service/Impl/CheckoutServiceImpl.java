@@ -7,14 +7,20 @@ import com.elibrary.backend.modules.book.repository.BookRepository;
 import com.elibrary.backend.modules.checkout.dto.CheckoutCountDTO;
 import com.elibrary.backend.modules.checkout.dto.CheckoutPerUserDTO;
 import com.elibrary.backend.modules.checkout.dto.CurrentLoanResponse;
+import com.elibrary.backend.modules.checkout.dto.LoanOverviewDTO;
 import com.elibrary.backend.modules.checkout.entity.Checkout;
+import com.elibrary.backend.modules.checkout.enums.LoanStatus;
+import com.elibrary.backend.modules.checkout.exception.BookAlreadyReturnedException;
 import com.elibrary.backend.modules.checkout.exception.LoanOverdueException;
+import com.elibrary.backend.modules.checkout.exception.MaximumRenewalsReachedException;
 import com.elibrary.backend.modules.checkout.repository.CheckoutRepository;
 import com.elibrary.backend.modules.checkout.service.CheckoutService;
 import com.elibrary.backend.modules.user.entity.User;
 import com.elibrary.backend.modules.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -39,6 +45,9 @@ public class CheckoutServiceImpl implements CheckoutService {
     private final UserRepository userRepository;
 
     private static final int MAX_LOAN_DAYS = 7;
+
+    private static final int MAX_RENEWALS = 2;
+
 
     /**
      * Allows a user to check out a book
@@ -193,7 +202,7 @@ public class CheckoutServiceImpl implements CheckoutService {
                 .orElseThrow(() -> new ResourceNotFoundExceptions("The requested book could not be found"));
 
 
-        // Check if a checkout record exists for the user and book
+        // Check if the book is already checked out by the user
         Checkout existingCheckout = checkoutRepository.findByUserAndBookId(user, bookId);
 
         // If no existing checkout record is found, throw an exception
@@ -201,12 +210,18 @@ public class CheckoutServiceImpl implements CheckoutService {
             throw new ResourceNotFoundExceptions("This book is not currently checked out under this account");
         }
 
+        // If the book has already been returned, throw an exception
+        if (existingCheckout.getReturnedDate() != null) {
+            throw new BookAlreadyReturnedException("This book has already been returned");
+        }
+
+        // Update the checkout with the return date
+        existingCheckout.setReturnedDate(LocalDate.now());
+        checkoutRepository.save(existingCheckout);
+
         // Increases available copies and saves the book
         book.setCopiesAvailable(book.getCopiesAvailable() + 1);
         bookRepository.save(book);
-
-        // Delete the checkout record from the database
-        checkoutRepository.deleteById(existingCheckout.getId());
     }
 
     /**
@@ -222,12 +237,17 @@ public class CheckoutServiceImpl implements CheckoutService {
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new ResourceNotFoundExceptions("User not found"));
 
-        // Check if a checkout record exists for the user and book
+        // Check if the book is already checked out by the user
         Checkout existingCheckout = checkoutRepository.findByUserAndBookId(user, bookId);
 
         // If no existing checkout record is found, throw an exception
         if (existingCheckout == null) {
             throw new ResourceNotFoundExceptions("This book is not currently checked out under this account");
+        }
+
+        // If the maximum number of renewals has been reached, throw an exception
+        if (existingCheckout.getRenewalCount() >= MAX_RENEWALS) {
+            throw new MaximumRenewalsReachedException("Maximum number of renewals reached for this loan");
         }
 
         // Get the current return date of the loan
@@ -241,11 +261,15 @@ public class CheckoutServiceImpl implements CheckoutService {
             throw new LoanOverdueException("Loan is overdue and cannot be renewed. Please return the book");
         }
 
-        // Extend the loan's return date by the default period
+        // Update the return date by adding the maximum loan days
         LocalDate newReturnDate = today.plusDays(MAX_LOAN_DAYS);
 
-        // Update the return date on the existing checkout record
+        // Update the return date
         existingCheckout.setReturnDate(newReturnDate);
+
+        // Increment the renewal count for this checkout
+        existingCheckout.setRenewalCount(existingCheckout.getRenewalCount() + 1);
+
 
         // Save the updated checkout record to the database
         checkoutRepository.save(existingCheckout);
@@ -287,5 +311,139 @@ public class CheckoutServiceImpl implements CheckoutService {
                 }).toList();
 
         return checkoutPerUser;
+    }
+
+    /**
+     * Fetches all current user checkouts with loan details
+     *
+     * @param pageable the pagination information
+     * @return a page of LoanOverviewDTO objects representing current checkouts
+     */
+    @Override
+    public Page<LoanOverviewDTO> adminGetAllCheckouts(Pageable pageable) {
+
+        // Get the current date
+        LocalDate today = LocalDate.now();
+
+        // Get all checkout records
+        Page<Checkout> checkoutPage = checkoutRepository.findAll(pageable);
+
+        // Transform each checkout record into a LoanOverviewDTO
+        return checkoutPage.map(checkout -> {
+
+            // Find the book for the checkout's book ID, or throw an exception if not found
+            Book book = bookRepository.findById(checkout.getBookId())
+                    .orElseThrow(() -> new ResourceNotFoundExceptions("Book not found"));
+
+            // Get the user who borrowed the book
+            User user = checkout.getUser();
+
+            // Get the number of days remaining until the due date
+            int daysLeft = (int) ChronoUnit.DAYS.between(today, checkout.getReturnDate());
+
+            // Build the loan overview response object
+            LoanOverviewDTO loanOverviewDTO = new LoanOverviewDTO();
+            loanOverviewDTO.setId(checkout.getId());
+            loanOverviewDTO.setUserId(user.getUserId());
+            loanOverviewDTO.setUserName(user.getName());
+            loanOverviewDTO.setUserEmail(user.getEmail());
+            loanOverviewDTO.setBookId(book.getId());
+            loanOverviewDTO.setBookTitle(book.getTitle());
+            loanOverviewDTO.setBookAuthor(book.getAuthor());
+            loanOverviewDTO.setCheckoutDate(checkout.getCheckoutDate());
+            loanOverviewDTO.setReturnDate(checkout.getReturnDate());
+            loanOverviewDTO.setRenewalCount(checkout.getRenewalCount());
+            loanOverviewDTO.setReturnedDate(checkout.getReturnedDate());
+            loanOverviewDTO.setRemainingDays(daysLeft);
+
+            // Set the loan status based on returned date and days left
+            if (checkout.getReturnedDate() != null) {
+                loanOverviewDTO.setStatus(LoanStatus.RETURNED);
+                loanOverviewDTO.setRemainingDays(0);
+            } else if (daysLeft < 0) {
+                loanOverviewDTO.setStatus(LoanStatus.OVERDUE);
+            } else if (daysLeft <= 3) {
+                loanOverviewDTO.setStatus(LoanStatus.DUE_SOON);
+            } else {
+                loanOverviewDTO.setStatus(LoanStatus.ACTIVE);
+            }
+
+            // Return the LoanOverviewDTO for the current checkout
+            return loanOverviewDTO;
+        });
+    }
+
+    /**
+     * Renews a loan for the user and book
+     *
+     * @param userId the id of the user
+     * @param bookId the id of the book to renew
+     */
+    @Override
+    public void adminRenewBookLoan(String userId, Long bookId) {
+
+        // Find the user by their id, or throw an exception if not found
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundExceptions("User not found"));
+
+        // Check if the book is already checked out by the user
+        Checkout checkout = checkoutRepository.findByUserAndBookId(user, bookId);
+
+        // If no existing checkout record is found, throw an exception
+        if (checkout == null) {
+            throw new ResourceNotFoundExceptions("This book is not currently checked out under this account");
+        }
+
+        // If the maximum number of renewals has been reached, throw an exception
+        if (checkout.getRenewalCount() >= MAX_RENEWALS) {
+            throw new MaximumRenewalsReachedException("Maximum number of renewals reached for this loan");
+        }
+
+        // Update the return date by adding the maximum loan days
+        LocalDate newReturnDate = LocalDate.now().plusDays(MAX_LOAN_DAYS);
+
+        // Update the return date
+        checkout.setReturnDate(newReturnDate);
+
+        // Increment the renewal count for this checkout
+        checkout.setRenewalCount(checkout.getRenewalCount() + 1);
+
+        // Save the updated checkout record to the database
+        checkoutRepository.save(checkout);
+    }
+
+
+
+    /**
+     * Returns a book currently checked out by a user
+     *
+     * @param userId the id of the user
+     * @param bookId the id of the book being returned
+     */
+    @Override
+    public void adminReturnBook(String userId, Long bookId) {
+
+        // Find the user by their id, or throw an exception if not found
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundExceptions("User not found"));
+
+        // Find the book by its id, or throw an exception if not found
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new ResourceNotFoundExceptions("Book not found"));
+
+        // Check if the book is already checked out by the user
+        Checkout checkout = checkoutRepository.findByUserAndBookId(user, bookId);
+
+        // If no existing checkout record is found, throw an exception
+        if (checkout == null) {
+            throw new ResourceNotFoundExceptions("No checkout record found for this user and book");
+        }
+
+        // Increases available copies and saves the book
+        book.setCopiesAvailable(book.getCopiesAvailable() + 1);
+        bookRepository.save(book);
+
+        // Delete the checkout record from the database
+        checkoutRepository.deleteById(checkout.getId());
     }
 }

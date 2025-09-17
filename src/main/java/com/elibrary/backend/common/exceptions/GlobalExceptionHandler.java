@@ -3,7 +3,9 @@ package com.elibrary.backend.common.exceptions;
 
 import com.elibrary.backend.modules.auth.exception.InvalidCredentialsException;
 import com.elibrary.backend.modules.auth.exception.UserAlreadyExistsException;
+import com.elibrary.backend.modules.checkout.exception.BookAlreadyReturnedException;
 import com.elibrary.backend.modules.checkout.exception.LoanOverdueException;
+import com.elibrary.backend.modules.checkout.exception.MaximumRenewalsReachedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -154,10 +156,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      * @param ex the LoanOverdueException thrown
      * @return an ErrorObject with error details
      */
-    @ResponseStatus(HttpStatus.BAD_REQUEST) // Using 400 Bad Request for business rule violation
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(LoanOverdueException.class)
     public ErrorObject handleLoanOverdueException(LoanOverdueException ex) {
-        log.warn("Loan overdue error: {}", ex.getMessage()); // Using warn as it's a client-side business rule violation
+        log.warn("Loan overdue error: {}", ex.getMessage());
         return ErrorObject.builder()
                 .errorCode("LOAN_OVERDUE") // Specific error code
                 .statusCode(HttpStatus.BAD_REQUEST.value())
@@ -165,6 +167,44 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .timestamp(new Date())
                 .build();
     }
+
+    /**
+     * Handles MaximumRenewalsReachedException with a 400 BAD REQUEST status
+     *
+     * @param ex the MaximumRenewalsReachedException thrown
+     * @return an ErrorObject with error details
+     */
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MaximumRenewalsReachedException.class)
+    public ErrorObject handleMaximumRenewalsReachedException(MaximumRenewalsReachedException ex) {
+        log.warn("Maximum renewals reached: {}", ex.getMessage());
+        return ErrorObject.builder()
+                .errorCode("MAXIMUM_RENEWALS_REACHED")
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .message(ex.getMessage())
+                .timestamp(new Date())
+                .build();
+    }
+
+    /**
+     * Handles BookAlreadyReturnedException with a 400 BAD REQUEST status
+     *
+     * @param ex the BookAlreadyReturnedException thrown
+     * @return an ErrorObject with error details
+     */
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(BookAlreadyReturnedException.class)
+    public ErrorObject handleBookAlreadyReturnedException(BookAlreadyReturnedException ex) {
+        log.warn("Book already returned: {}", ex.getMessage());
+        return ErrorObject.builder()
+                .errorCode("BOOK_ALREADY_RETURNED")
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .message(ex.getMessage())
+                .timestamp(new Date())
+                .build();
+    }
+
+
 
 
 }

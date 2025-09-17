@@ -33,7 +33,13 @@ public class Checkout {
     @Column(name = "return_date")
     private LocalDate returnDate;
 
+    @Column(name = "returned_date")
+    private LocalDate returnedDate;
+
     @Column(name = "book_id")
     private Long bookId;
+
+    @Column(name = "renewal_count", nullable = false)
+    private int renewalCount = 0;
 }
 

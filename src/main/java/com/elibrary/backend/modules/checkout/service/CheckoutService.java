@@ -4,6 +4,9 @@ import com.elibrary.backend.modules.book.entity.Book;
 import com.elibrary.backend.modules.checkout.dto.CheckoutCountDTO;
 import com.elibrary.backend.modules.checkout.dto.CheckoutPerUserDTO;
 import com.elibrary.backend.modules.checkout.dto.CurrentLoanResponse;
+import com.elibrary.backend.modules.checkout.dto.LoanOverviewDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -76,5 +79,27 @@ public interface CheckoutService {
      */
     List<CheckoutPerUserDTO> getUserCheckoutCounts();
 
+    /**
+     * Fetches all current user loans
+     *
+     * @param pageable the pagination information
+     * @return a page of LoanOverviewDTO objects representing current loans
+     */
+    Page<LoanOverviewDTO> adminGetAllCheckouts(Pageable pageable);
 
+    /**
+     * Allows an admin to renew a user's loan
+     *
+     * @param userId the id of the user
+     * @param bookId the id of the book to renew
+     */
+    void adminRenewBookLoan(String userId, Long bookId);
+
+    /**
+     * Allows an admin to return a user's borrowed book
+     *
+     * @param userId the id of the user
+     * @param bookId the id of the book being returned
+     */
+    void adminReturnBook(String userId, Long bookId);
 }
