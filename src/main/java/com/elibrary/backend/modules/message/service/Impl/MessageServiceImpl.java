@@ -161,10 +161,10 @@ public class MessageServiceImpl implements MessageService {
      * @return confirmation message has been replied to
      */
     @Override
-    public void replyToUserMessage(AdminReplyRequestDTO adminReplyRequestDTO, String adminEmail) {
+    public void replyToUserMessage(AdminReplyRequestDTO adminReplyRequestDTO, Long messageId, String adminEmail) {
 
         // Find the message by its id
-        Optional<Message> message = messageRepository.findById(adminReplyRequestDTO.getId());
+        Optional<Message> message = messageRepository.findById(messageId);
 
         // If message is not found, throw exception
         if (message.isEmpty()) {
