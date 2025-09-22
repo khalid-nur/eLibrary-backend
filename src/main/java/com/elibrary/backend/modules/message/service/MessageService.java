@@ -61,7 +61,7 @@ public interface MessageService {
      * @param adminReplyRequestDTO the reply details including message ID and response
      * @param adminEmail           the email of the admin replying
      */
-    void replyToUserMessage(AdminReplyRequestDTO adminReplyRequestDTO , String adminEmail);
+    void replyToUserMessage(AdminReplyRequestDTO adminReplyRequestDTO,Long messageId, String adminEmail);
 
     /**
      * Deletes a message by its ID (admin only)

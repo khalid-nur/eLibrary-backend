@@ -97,7 +97,7 @@ public class MessageController {
      *
      * @return number of pending messages
      */
-    @GetMapping("admin/message-counts")
+    @GetMapping("/admin/message-counts")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<MessageCountsDTO> getMessageCountsByStatus() {
         return ResponseEntity.ok(messageService.getMessageCountsByStatus());
@@ -111,13 +111,15 @@ public class MessageController {
      * @param adminReplyRequestDTO the message reply request
      * @return confirmation message has been replied to, status 200
      */
-    @PutMapping("admin/message/reply")
+
+    @PutMapping("/admin/messages/{messageId}/reply")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Void> replyToUserMessage(@AuthenticationPrincipal UserDetails userDetails,
-                                                   @RequestBody AdminReplyRequestDTO adminReplyRequestDTO) {
+                                                   @PathVariable Long messageId,
+                                                   @Valid @RequestBody AdminReplyRequestDTO adminReplyRequestDTO) {
         String adminEmail = userDetails.getUsername();
 
-        messageService.replyToUserMessage(adminReplyRequestDTO, adminEmail);
+        messageService.replyToUserMessage(adminReplyRequestDTO,messageId, adminEmail);
 
         return ResponseEntity.ok().build();
     }
@@ -128,7 +130,7 @@ public class MessageController {
      * @param messageId the id of the message to delete
      * @return confirmation message has been deleted, status 204
      */
-    @DeleteMapping("admin/message/{messageId}")
+    @DeleteMapping("/admin/message/{messageId}")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Void> deleteMessageById(@PathVariable Long messageId) {
         messageService.deleteMessageById(messageId);
