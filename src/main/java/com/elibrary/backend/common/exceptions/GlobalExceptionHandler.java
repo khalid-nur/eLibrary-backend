@@ -1,8 +1,7 @@
 package com.elibrary.backend.common.exceptions;
 
 
-import com.elibrary.backend.modules.auth.exception.InvalidCredentialsException;
-import com.elibrary.backend.modules.auth.exception.UserAlreadyExistsException;
+import com.elibrary.backend.modules.auth.exception.*;
 import com.elibrary.backend.modules.checkout.exception.BookAlreadyReturnedException;
 import com.elibrary.backend.modules.checkout.exception.LoanOverdueException;
 import com.elibrary.backend.modules.checkout.exception.MaximumRenewalsReachedException;
@@ -204,9 +203,59 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .build();
     }
 
+    /**
+     * Handles invalid password reset tokens (400 Bad Request).
+     *
+     * @param ex the InvalidPasswordResetTokenException thrown
+     * @return an ErrorObject describing the invalid token issue
+     */
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(InvalidPasswordResetTokenException.class)
+    public ErrorObject handleInvalidPasswordResetToken(InvalidPasswordResetTokenException ex) {
+        log.warn("Invalid password reset token: {}", ex.getMessage());
+        return ErrorObject.builder()
+                .errorCode("INVALID_PASSWORD_RESET_TOKEN")
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .message(ex.getMessage())
+                .timestamp(new Date())
+                .build();
+    }
 
+    /**
+     * Handles password reset tokens that have already been used (400 Bad Request).
+     *
+     * @param ex the PasswordResetTokenAlreadyUsedException thrown
+     * @return an ErrorObject describing the already-used token issue
+     */
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(PasswordResetTokenAlreadyUsedException.class)
+    public ErrorObject handlePasswordResetTokenAlreadyUsed(PasswordResetTokenAlreadyUsedException ex) {
+        log.warn("Password reset token already used: {}", ex.getMessage());
+        return ErrorObject.builder()
+                .errorCode("PASSWORD_RESET_TOKEN_ALREADY_USED")
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .message(ex.getMessage())
+                .timestamp(new Date())
+                .build();
+    }
 
-
+    /**
+     * Handles expired password reset tokens (400 Bad Request).
+     *
+     * @param ex the PasswordResetTokenExpiredException thrown
+     * @return an ErrorObject describing the expired token issue
+     */
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(PasswordResetTokenExpiredException.class)
+    public ErrorObject handlePasswordResetTokenExpired(PasswordResetTokenExpiredException ex) {
+        log.warn("Password reset token expired: {}", ex.getMessage());
+        return ErrorObject.builder()
+                .errorCode("PASSWORD_RESET_TOKEN_EXPIRED")
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .message(ex.getMessage())
+                .timestamp(new Date())
+                .build();
+    }
 }
 
 
