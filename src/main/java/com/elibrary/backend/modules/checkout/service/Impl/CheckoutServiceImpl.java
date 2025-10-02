@@ -15,6 +15,8 @@ import com.elibrary.backend.modules.checkout.exception.LoanOverdueException;
 import com.elibrary.backend.modules.checkout.exception.MaximumRenewalsReachedException;
 import com.elibrary.backend.modules.checkout.repository.CheckoutRepository;
 import com.elibrary.backend.modules.checkout.service.CheckoutService;
+import com.elibrary.backend.modules.history.entity.History;
+import com.elibrary.backend.modules.history.repository.HistoryRepository;
 import com.elibrary.backend.modules.user.entity.User;
 import com.elibrary.backend.modules.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +45,8 @@ public class CheckoutServiceImpl implements CheckoutService {
     private final CheckoutRepository checkoutRepository;
 
     private final UserRepository userRepository;
+
+    private final HistoryRepository historyRepository;
 
     private static final int MAX_LOAN_DAYS = 7;
 
@@ -215,13 +219,26 @@ public class CheckoutServiceImpl implements CheckoutService {
             throw new BookAlreadyReturnedException("This book has already been returned");
         }
 
-        // Update the checkout with the return date
-        existingCheckout.setReturnedDate(LocalDate.now());
-        checkoutRepository.save(existingCheckout);
-
         // Increases available copies and saves the book
         book.setCopiesAvailable(book.getCopiesAvailable() + 1);
         bookRepository.save(book);
+
+        // Delete the checkout record from the database
+        checkoutRepository.deleteById(existingCheckout.getId());
+
+        // Create a history record
+        History history = new History();
+        history.setUser(user);
+        history.setBookId(book.getId());
+        history.setCheckoutDate(existingCheckout.getCheckoutDate());
+        history.setReturnDate(LocalDate.now());
+        history.setTitle(book.getTitle());
+        history.setAuthor(book.getAuthor());
+        history.setDescription(book.getDescription());
+        history.setImg(book.getImg());
+
+        // Save the history record
+        historyRepository.save(history);
     }
 
     /**
