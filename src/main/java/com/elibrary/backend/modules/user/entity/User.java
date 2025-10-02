@@ -3,6 +3,7 @@ package com.elibrary.backend.modules.user.entity;
 import com.elibrary.backend.modules.checkout.entity.Checkout;
 import com.elibrary.backend.modules.message.entity.Message;
 import com.elibrary.backend.modules.review.entity.Review;
+import com.elibrary.backend.modules.history.entity.History;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -60,6 +61,9 @@ public class User implements UserDetails {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Checkout> checkouts;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<History> History;
 
 
 
