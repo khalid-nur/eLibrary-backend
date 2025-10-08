@@ -15,6 +15,7 @@ import com.elibrary.backend.modules.checkout.exception.LoanOverdueException;
 import com.elibrary.backend.modules.checkout.exception.MaximumRenewalsReachedException;
 import com.elibrary.backend.modules.checkout.repository.CheckoutRepository;
 import com.elibrary.backend.modules.checkout.service.CheckoutService;
+import com.elibrary.backend.modules.emailNotification.service.EmailService;
 import com.elibrary.backend.modules.history.entity.History;
 import com.elibrary.backend.modules.history.repository.HistoryRepository;
 import com.elibrary.backend.modules.user.entity.User;
@@ -47,6 +48,8 @@ public class CheckoutServiceImpl implements CheckoutService {
     private final UserRepository userRepository;
 
     private final HistoryRepository historyRepository;
+
+    private final EmailService emailService;
 
     private static final int MAX_LOAN_DAYS = 7;
 
@@ -99,6 +102,10 @@ public class CheckoutServiceImpl implements CheckoutService {
 
         // Save the new checkout to the database
         checkoutRepository.save(checkout);
+
+        // Send a confirmation email to the user
+        emailService.sendCheckoutConfirmationEmail(user.getName(), user.getEmail(), LocalDate.now(),
+                LocalDate.now().plusDays(MAX_LOAN_DAYS), book.getTitle(), book.getAuthor(), book.getCategory());
 
         // Return the book the user checked out
         return book;

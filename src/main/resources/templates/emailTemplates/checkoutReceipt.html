@@ -1,0 +1,61 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+    <title>Library Checkout Receipt</title>
+</head>
+    <body  style="font-family: Arial, sans-serif; background-color: #ffffff; padding: 20px;">
+        <div style="max-width:600px; margin:24px auto; background:#ffffff; border-radius:8px; border: 1px solid #eaeaea; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+
+            <div style="padding:10px 20px;">
+                <div>
+                    <img src="cid:image" alt="eLibrary Logo" width="200" />
+                </div>
+            </div>
+
+            <div style="padding:20px; font-size: 16px">
+                <p th:text="'Hello, ' + ${userName} + '!'"></p>
+
+                <p style="margin-bottom:12px; font-size:16px; color:#666;">
+                    <span th:text="'Checked out: ' + ${#temporals.format(checkoutDate, 'MMMM d, yyyy')}"></span>
+                    <br/>
+                    <span th:text="'Due back: ' + ${#temporals.format(returnDate, 'MMMM d, yyyy')}"></span>
+                </p>
+
+                <table style="width:100%; border-collapse:collapse; margin-top:16px;">
+                    <thead>
+                    <tr>
+                        <th style="text-align:left; padding:10px 8px; border-bottom:1px solid #eee; background:#fafafa; font-weight:600; color:#333;">Title</th>
+                        <th style="text-align:left; padding:10px 8px; border-bottom:1px solid #eee; background:#fafafa; font-weight:600; color:#333;">Author</th>
+                        <th style="text-align:left; padding:10px 8px; border-bottom:1px solid #eee; background:#fafafa; font-weight:600; color:#333;">Category</th>
+                        <th style="text-align:left; padding:10px 8px; border-bottom:1px solid #eee; background:#fafafa; font-weight:600; color:#333;">Date</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td style="padding:10px 8px; border-bottom:1px solid #eee; font-size:16px;" th:text="${bookTitle}"></td>
+                        <td style="padding:10px 8px; border-bottom:1px solid #eee; font-size:16px;" th:text="${bookAuthor}"></td>
+                        <td style="padding:10px 8px; border-bottom:1px solid #eee; font-size:16px;" th:text="${bookCategory}"></td>
+                        <td style="padding:10px 8px; border-bottom:1px solid #eee; font-size:16px;" th:text="${#temporals.format(returnDate, 'MMMM d, yyyy')}">
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <p style="font-size:14px; color:#888; margin-top:12px;">
+                    Please return the book on its specific due date so others can enjoy it too.
+                </p>
+
+                <a th:href="${eLibraryUrl}"
+                   style="display:inline-block; padding:12px 20px; border-radius:6px; text-decoration:none; font-weight:bold; background:#ff8804; color:white; margin-top:12px;">
+                    Explore more books
+                </a>
+            </div>
+
+            <div style="padding:16px; background:#fafafa; text-align:center;">
+                <p style=" font-size:14px; color:#888;">If you have questions, contact our support team.</p>
+            </div>
+        </div>
+    </body>
+</html>
