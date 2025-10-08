@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import java.time.LocalDate;
 import java.util.Map;
 
 /**
@@ -33,6 +34,9 @@ public class EmailServiceImpl implements EmailService {
 
     @Value("${frontend.url}")
     private String frontendUrl;
+
+    private final String imageLogoPath = "/Downloads/elibrary_logo.png";
+
 
     /**
      * Sends a password reset email to the user with a reset link
@@ -82,20 +86,8 @@ public class EmailServiceImpl implements EmailService {
             // Add the HTML body part to the multipart container
             mimeMultipart.addBodyPart(htmlBodyPart);
 
-            // Create a MIME body part for the image
-            MimeBodyPart imageBodyPart = new MimeBodyPart();
-
-            // Load the image from the local file system (e.g., Downloads folder)
-            DataSource dataSource = new FileDataSource(System.getProperty("user.home") + "/Downloads/elibrary_logo.png");
-
-            // Attach the image to the MIME body part
-            imageBodyPart.setDataHandler(new DataHandler(dataSource));
-
-            // Set the Content-ID header to reference the image in the HTML email
-            imageBodyPart.setHeader("Content-ID", "<image>");
-
-            // Add the image body part to the multipart container
-            mimeMultipart.addBodyPart(imageBodyPart);
+            // Add embedded logo image to email
+            addLogoImage(mimeMultipart, imageLogoPath);
 
             // Set the multipart as the email content
             mimeMessage.setContent(mimeMultipart);
@@ -107,6 +99,77 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
-}
+    /**
+     * Sends a checkout confirmation email with book details
+     *
+     * @param userName     the name of the user receiving the email
+     * @param to           the email address of the user
+     * @param checkoutDate the date the book was checked out
+     * @param returnDate   the expected return date for the book
+     * @param bookTitle    the title of the checked out book
+     * @param bookAuthor   the author of the checked out book
+     * @param bookCategory the category of the checked out book
+     */
+    @Override
+    public void sendCheckoutConfirmationEmail(String userName, String to, LocalDate checkoutDate, LocalDate returnDate,
+                                              String bookTitle, String bookAuthor, String bookCategory) {
+
+       try {
+
+           String subject = "Checkout Confirmation";
+           String resetUrl = frontendUrl + "/search";
+
+           MimeMessage mimeMessage = mailSender.createMimeMessage();
+
+           MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
+
+           helper.setTo(to);
+
+           helper.setSubject(subject);
+
+           Context context = new Context();
+
+           context.setVariables(Map.of("userName", userName, "bookTitle", bookTitle, "bookAuthor", bookAuthor,"bookCategory", bookCategory,
+                   "checkoutDate", checkoutDate, "returnDate", returnDate,
+                   "eLibraryUrl", resetUrl));
+
+           String htmlContent = templateEngine.process("emailTemplates/checkoutReceipt", context);
+
+           MimeMultipart mimeMultipart = new MimeMultipart("related");
+
+           MimeBodyPart htmlBodyPart = new MimeBodyPart();
+
+           htmlBodyPart.setContent(htmlContent, "text/html");
+
+           mimeMultipart.addBodyPart(htmlBodyPart);
+
+           addLogoImage(mimeMultipart, imageLogoPath);
+
+           mimeMessage.setContent(mimeMultipart);
+
+           emailSender.sendMail(mimeMessage);
+
+       } catch (Exception e) {
+           throw new RuntimeException("Failed to send checkout receipt email confirmation ", e);
+       }
+    }
+
+    private void addLogoImage(MimeMultipart multipart, String imagePath) throws Exception {
+        // Create a MIME body part for the image
+        MimeBodyPart imageBodyPart = new MimeBodyPart();
+
+        // Load the image from the local file system
+        DataSource dataSource = new FileDataSource(System.getProperty("user.home") + imagePath);
+
+        // Attach the image to the MIME body part
+        imageBodyPart.setDataHandler(new DataHandler(dataSource));
+
+        // Set the Content-ID header to reference the image in the HTML email
+        imageBodyPart.setHeader("Content-ID", "<image>");
+
+        // Add the image body part to the multipart container
+        multipart.addBodyPart(imageBodyPart);
+    }
+    }
 
 
